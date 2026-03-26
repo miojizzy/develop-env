@@ -1,5 +1,5 @@
 main:
-  manual:
+  push:
     - services:
         - docker
       stages:
