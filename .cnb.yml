@@ -1,0 +1,17 @@
+main:
+  manual:
+    - services:
+        - docker
+      stages:
+        - name: Docker build
+          script: >
+            docker build
+            --no-cache
+            --network=host
+            --build-arg USERNAME=zhaozeyu
+            --build-arg UID=63676
+            --build-arg GID=63676
+            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest
+            ./develop_env_docker
+        - name: Docker push
+          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest
