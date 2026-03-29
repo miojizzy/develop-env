@@ -3,7 +3,7 @@ main:
     - services:
         - docker
       stages:
-        - name: Docker build
+        - name: Docker build work
           script: >
             docker build
             --no-cache
@@ -11,7 +11,19 @@ main:
             --build-arg USERNAME=zhaozeyu
             --build-arg UID=63676
             --build-arg GID=63676
-            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest
+            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-work
             ./develop_env_docker
-        - name: Docker push
-          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest
+        - name: Docker push work
+          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-work
+        - name: Docker build life
+          script: >
+            docker build
+            --no-cache
+            --network=host
+            --build-arg USERNAME=zhaozeyu
+            --build-arg UID=1001
+            --build-arg GID=1001
+            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-life
+            ./develop_env_docker
+        - name: Docker push life
+          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-life
