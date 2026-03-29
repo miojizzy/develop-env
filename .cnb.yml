@@ -3,27 +3,35 @@ main:
     - services:
         - docker
       stages:
-        - name: Docker build work
-          script: >
-            docker build
-            --no-cache
-            --network=host
-            --build-arg USERNAME=zhaozeyu
-            --build-arg UID=63676
-            --build-arg GID=63676
-            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-work
-            ./develop_env_docker
-        - name: Docker push work
-          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-work
-        - name: Docker build life
-          script: >
-            docker build
-            --no-cache
-            --network=host
-            --build-arg USERNAME=zhaozeyu
-            --build-arg UID=1001
-            --build-arg GID=1001
-            -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-life
-            ./develop_env_docker
-        - name: Docker push life
-          script: docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-life
+        - name: Parallel build and push
+          jobs:
+            work:  # 并行任务1：构建 work 镜像
+              env:
+                TAG_SUFFIX: work
+                UID: 63676
+                GID: 63676
+              script: |
+                docker build \
+                  --no-cache \
+                  --network=host \
+                  --build-arg USERNAME=zhaozeyu \
+                  --build-arg UID=${UID} \
+                  --build-arg GID=${GID} \
+                  -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX} \
+                  ./develop_env_docker
+                docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX}
+            life:  # 并行任务2：构建 life 镜像
+              env:
+                TAG_SUFFIX: life
+                UID: 1001
+                GID: 1001
+              script: |
+                docker build \
+                  --no-cache \
+                  --network=host \
+                  --build-arg USERNAME=zhaozeyu \
+                  --build-arg UID=${UID} \
+                  --build-arg GID=${GID} \
+                  -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX} \
+                  ./develop_env_docker
+                docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX}
