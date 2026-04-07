@@ -2,6 +2,27 @@
 
 构建开发环境 Docker 镜像的全套脚本。
 
+## 快速开始
+
+### 启动容器
+
+
+```bash
+#在宿主机上拉取构建好的镜像,UID在构建镜像时对齐
+docker pull docker.cnb.cool/miojizzy/develop-env/develop-env:latest-work
+
+# 指定用户和挂载目录启动
+USER="user"
+NAME="dev"
+docker run -it \
+    --user ${USER} \
+    --name ${NAME} \
+    -v $(pwd)/proj:/home/${USER}/ \
+    docker.cnb.cool/miojizzy/develop-env/develop-env:latest-work \
+    /bin/zsh
+```
+
+
 ## 文件结构
 
 ```

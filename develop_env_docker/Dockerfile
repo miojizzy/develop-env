@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     docker.io \
     docker-compose \
+    tmux \
     && ln -sf /usr/bin/python3.12 /usr/bin/python3 \
     && ln -sf /usr/bin/g++-13 /usr/bin/g++ \
     && ln -sf /usr/bin/gcc-13 /usr/bin/gcc \
@@ -118,4 +119,3 @@ ENV LANGUAGE=C.UTF-8
 # 切换到 ${USERNAME} 用户，连接后默认以该用户登录
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/workspace
-COPY --chown=${USERNAME}:${USERNAME} . /home/${USERNAME}/workspace
