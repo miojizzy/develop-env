@@ -107,6 +107,10 @@ COPY init.d/07_install_nvm_node.sh /tmp/init.d/
 RUN chmod +x /tmp/init.d/07_install_nvm_node.sh \
     && DRY_RUN=${DRY_RUN} /tmp/init-runner.sh ${USERNAME} 07
 
+COPY init.d/09_install_bun.sh /tmp/init.d/
+RUN chmod +x /tmp/init.d/09_install_bun.sh \
+    && DRY_RUN=${DRY_RUN} /tmp/init-runner.sh ${USERNAME} 09
+
 COPY init.d/08_fix_permissions.sh /tmp/init.d/
 RUN chmod +x /tmp/init.d/08_fix_permissions.sh \
     && DRY_RUN=${DRY_RUN} /tmp/init-runner.sh ${USERNAME} 08 \

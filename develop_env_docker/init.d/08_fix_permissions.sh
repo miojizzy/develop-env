@@ -13,7 +13,7 @@ fi
 for USER_HOME in "/root" "/home/${USERNAME}"; do
   if [ -d "${USER_HOME}" ]; then
     user_name=$(basename "${USER_HOME}")
-    for p in ".oh-my-zsh" ".zshrc" ".nvm"; do
+    for p in ".oh-my-zsh" ".zshrc" ".nvm" ".bun"; do
       if [ -e "${USER_HOME}/${p}" ]; then
         chown -R "${user_name}:${user_name}" "${USER_HOME}/${p}" || true
       fi
