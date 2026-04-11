@@ -20,8 +20,11 @@ install_nvm_for() {
   local script="/tmp/nvm_install_${user}.sh"
   local installed=0
 
-  # Try installer script
-  if curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" -o "${script}"; then
+  # Try installer script with mirror fallback
+  NVM_INSTALL_URL="https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh"
+  NVM_INSTALL_MIRROR="https://mirror.ghproxy.com/https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh"
+  
+  if curl -fsSL "${NVM_INSTALL_URL}" -o "${script}" 2>/dev/null || curl -fsSL "${NVM_INSTALL_MIRROR}" -o "${script}"; then
     if [ "${user}" = "root" ]; then
       bash "${script}" || true
     else
@@ -50,11 +53,12 @@ install_nvm_for() {
       source "${NVM_DIR}/nvm.sh"
       nvm install "${NODE_VERSION}"
       nvm alias default "${NODE_VERSION}"
+      npm config set registry https://registry.npmmirror.com
       npm install -g @hsupu/copilot-api || true
       installed=1
     fi
   else
-    su - "${user}" -c "bash -lc 'export NVM_DIR=\"${nvm_dir}\" && [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\" && nvm install ${NODE_VERSION} && nvm alias default ${NODE_VERSION} && npm install -g @hsupu/copilot-api'" || true
+    su - "${user}" -c "bash -lc 'export NVM_DIR=\"${nvm_dir}\" && [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\" && nvm install ${NODE_VERSION} && nvm alias default ${NODE_VERSION} && npm config set registry https://registry.npmmirror.com && npm install -g @hsupu/copilot-api'" || true
     # Check presence
     if su - "${user}" -c "bash -lc '[ -s \"${nvm_dir}/nvm.sh\" ] && echo ok'" | grep -q ok; then
       installed=1
@@ -67,13 +71,19 @@ install_nvm_for() {
   fi
 }
 
-install_nvm_for root /root
+# root and user in parallel
+install_nvm_for root /root &
+PID_ROOT=$!
 
 if id -u "${USERNAME}" >/dev/null 2>&1; then
-  install_nvm_for "${USERNAME}" "/home/${USERNAME}"
+  install_nvm_for "${USERNAME}" "/home/${USERNAME}" &
+  PID_USER=$!
 else
   echo "[07] User ${USERNAME} not found"
   exit 1
 fi
+
+wait $PID_ROOT
+wait $PID_USER
 
 echo "[07] nvm and node installed"

@@ -57,15 +57,19 @@ install_omz_for() {
   fi
 }
 
-# root
-install_omz_for root /root
+# root and user in parallel
+install_omz_for root /root &
+PID_ROOT=$!
 
-# user
 if id -u "${USERNAME}" >/dev/null 2>&1; then
-  install_omz_for "${USERNAME}" "/home/${USERNAME}"
+  install_omz_for "${USERNAME}" "/home/${USERNAME}" &
+  PID_USER=$!
 else
   echo "[04] User ${USERNAME} not found"
   exit 1
 fi
+
+wait $PID_ROOT
+wait $PID_USER
 
 echo "[04] Oh My Zsh installed"

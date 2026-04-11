@@ -5,6 +5,10 @@ FROM ubuntu:24.04
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
 
+# 使用阿里云镜像加速 apt 下载（国内网络优化）
+RUN sed -i 's@http://archive.ubuntu.com@http://mirrors.aliyun.com@g' /etc/apt/sources.list.d/ubuntu.sources && \
+    sed -i 's@http://security.ubuntu.com@http://mirrors.aliyun.com@g' /etc/apt/sources.list.d/ubuntu.sources || true
+
 # 安装 GCC 13、CMake 3.22+、Make、Python 3.12、Go 1.23、GDB
 RUN apt-get update && apt-get install -y \
     software-properties-common \
@@ -54,9 +58,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # 用 npm 全局安装 claude-code，替代 apt 源安装
-# 配置 npm 镜像源，再安装 claude-code
-RUN npm config set registry https://registry.npmmirror.com \
-    && npm install -g @anthropic-ai/claude-code
+# 配置 npm 和 pip 镜像源加速下载
+RUN npm config set registry https://registry.npmmirror.com && \
+    pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+RUN npm install -g @anthropic-ai/claude-code
 
 # 配置 Git LFS（全局）
 RUN git lfs install --system

@@ -31,15 +31,25 @@ clone_with_mirror() {
   return 1
 }
 
-for USER_HOME in "/root" "/home/${USERNAME}"; do
+install_plugins_for() {
+  local USER_HOME="$1"
   if [ -d "${USER_HOME}" ]; then
+    local user_name
     user_name=$(basename "${USER_HOME}")
-    plugin_dir="${USER_HOME}/.oh-my-zsh/custom/plugins"
+    local plugin_dir="${USER_HOME}/.oh-my-zsh/custom/plugins"
     mkdir -p "${plugin_dir}"
-    clone_with_mirror "zsh-users/zsh-autosuggestions" "${plugin_dir}/zsh-autosuggestions"
-    clone_with_mirror "zsh-users/zsh-syntax-highlighting" "${plugin_dir}/zsh-syntax-highlighting"
+    clone_with_mirror "zsh-users/zsh-autosuggestions" "${plugin_dir}/zsh-autosuggestions" &
+    clone_with_mirror "zsh-users/zsh-syntax-highlighting" "${plugin_dir}/zsh-syntax-highlighting" &
+    wait
     chown -R "${user_name}:${user_name}" "${USER_HOME}/.oh-my-zsh" || true
   fi
-done
+}
+
+install_plugins_for /root &
+PID_ROOT=$!
+install_plugins_for "/home/${USERNAME}" &
+PID_USER=$!
+wait $PID_ROOT
+wait $PID_USER
 
 echo "[05] zsh plugins installed"
