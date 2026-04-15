@@ -70,8 +70,13 @@ RUN git lfs install --system
 ARG UID=1000
 ARG GID=1000
 ARG USERNAME=user
-RUN groupadd -g ${GID} ${USERNAME} && \
-    useradd -m -u ${UID} -g ${USERNAME} -s /usr/bin/zsh ${USERNAME}
+RUN set -eux; \
+        if ! getent group "${USERNAME}" >/dev/null 2>&1; then \
+            groupadd "${USERNAME}"; \
+        fi; \
+        if ! id -u "${USERNAME}" >/dev/null 2>&1; then \
+            useradd -m -g "${USERNAME}" -s /usr/bin/zsh "${USERNAME}"; \
+        fi
 
 # DRY_RUN=1 跳过实际安装（输出伪成功），用于快速验证 Dockerfile 层结构
 ARG DRY_RUN=0
@@ -119,6 +124,10 @@ RUN chmod +x /tmp/init.d/09_install_bun.sh \
 COPY init.d/10_install_gh_glab.sh /tmp/init.d/
 RUN chmod +x /tmp/init.d/10_install_gh_glab.sh \
     && DRY_RUN=${DRY_RUN} /tmp/init-runner.sh ${USERNAME} 10
+
+COPY init.d/11_install_golangci_lint.sh /tmp/init.d/
+RUN chmod +x /tmp/init.d/11_install_golangci_lint.sh \
+    && DRY_RUN=${DRY_RUN} /tmp/init-runner.sh ${USERNAME} 11
 
 COPY init.d/08_fix_permissions.sh /tmp/init.d/
 RUN chmod +x /tmp/init.d/08_fix_permissions.sh \
