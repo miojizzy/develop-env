@@ -70,13 +70,8 @@ RUN git lfs install --system
 ARG UID=1000
 ARG GID=1000
 ARG USERNAME=user
-RUN set -eux; \
-        if ! getent group "${USERNAME}" >/dev/null 2>&1; then \
-            groupadd "${USERNAME}"; \
-        fi; \
-        if ! id -u "${USERNAME}" >/dev/null 2>&1; then \
-            useradd -m -g "${USERNAME}" -s /usr/bin/zsh "${USERNAME}"; \
-        fi
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -m -u ${UID} -g ${USERNAME} -s /usr/bin/zsh ${USERNAME}
 
 # DRY_RUN=1 跳过实际安装（输出伪成功），用于快速验证 Dockerfile 层结构
 ARG DRY_RUN=0
