@@ -1,6 +1,11 @@
 main:
   push:
-    - services:
+    # ① Docker 镜像构建：仅当 develop_env_docker/ 有文件变更时触发
+    #    （dotfiles / README 等改动不会重复构建镜像）
+    - name: build-images
+      ifModify:
+        - "develop_env_docker/**"
+      services:
         - docker
       stages:
         - name: Parallel build and push
@@ -35,3 +40,21 @@ main:
                   -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX} \
                   ./develop_env_docker
                 docker push ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/develop-env:latest-${TAG_SUFFIX}
+
+    # ② 同步到 GitHub：官方 tencentcom/git-sync 插件，push 模式。
+    #    - 不改写提交 → 两边 SHA 一致，无需 [sync] 前缀防循环
+    #    - 不设置 force → 非强推；对端有分叉提交时失败而不是静默覆盖
+    #      （插件 ${PLUGIN_FORCE:+--force} 特性：force 非空即强推，连 "false" 也算，
+    #        所以绝对不能写 force 字段）
+    - name: sync-github
+      imports:
+        - https://cnb.cool/miojizzy/secrets/-/blob/main/github-secrets.yml
+      stages:
+        - name: sync to github
+          image: tencentcom/git-sync
+          settings:
+            target_url: https://github.com/miojizzy/develop-env.git
+            auth_type: https
+            username: miojizzy
+            password: ${GITHUB_TOKEN}
+            branch: main

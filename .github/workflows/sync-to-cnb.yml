@@ -1,0 +1,35 @@
+name: Sync to CNB
+
+# GitHub → CNB 镜像同步，使用官方 tencentcom/git-sync 插件：
+# 不改写提交（两边 SHA 一致）、非强推（分叉时失败而非覆盖）。
+# 注意：不要设置 PLUGIN_FORCE —— 该变量只要非空（含 "false"）就会强推。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-to-cnb-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to CNB
+        uses: docker://tencentcom/git-sync
+        env:
+          PLUGIN_TARGET_URL: "https://cnb.cool/miojizzy/develop-env.git"
+          PLUGIN_AUTH_TYPE: "https"
+          PLUGIN_USERNAME: "cnb"
+          PLUGIN_PASSWORD: ${{ secrets.CNB_TOKEN }}
+          PLUGIN_BRANCH: "main"

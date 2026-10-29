@@ -1,0 +1,48 @@
+" custom vimrc "
+
+" 语法高亮 "
+syntax on
+
+" 显示行号 "
+set nu
+
+" 退格可以删到上一行 "
+set backspace=2 
+
+" tab设置 "
+set tabstop=4    
+set softtabstop=-1
+set shiftwidth=4   
+set expandtab
+
+" 换行自动对齐 "
+set autoindent
+set cindent
+
+" 显示特殊符号 "
+"set list"
+
+" 关闭高亮 "
+"set noh"
+
+" 开启搜索高亮和颜色配置 "
+set hlsearch
+highlight Keyword ctermbg=235  ctermfg=103  guibg=#262626 guifg=#8787af cterm=reverse gui=reverse
+
+" 打开文件回到上次位置
+if has("autocmd")
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+endif
+
+" vimdiff 下额外配置
+if &diff
+    set nonu
+    " 新增的行 "
+    highlight DiffAdd ctermbg=235  ctermfg=108  guibg=#262626 guifg=#87af87 cterm=reverse gui=reverse
+    " 删除的行 "
+    highlight DiffDelete ctermbg=235  ctermfg=131  guibg=#262626 guifg=#af5f5f cterm=reverse gui=reverse
+    " 差异的行 "
+    highlight DiffChange ctermbg=235  ctermfg=103  guibg=#262626 guifg=#8787af cterm=reverse gui=reverse
+    " 差异的文字 "
+    highlight DiffText ctermbg=235  ctermfg=208  guibg=#262626 guifg=#ff8700 cterm=reverse gui=reverse
+endif
