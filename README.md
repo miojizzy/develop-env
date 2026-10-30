@@ -17,7 +17,8 @@ legacy/               # 历史遗留（原 env_setup 的 backup/，仅存档）
 ## Docker 镜像
 
 push 到 `main` 且 **`develop_env_docker/` 有变更**时，CNB 流水线自动构建并推送两个镜像到
-`docker.cnb.cool/miojizzy/develop-env`：
+`docker.cnb.cool/miojizzy/develop-env/develop-env`（注意是双层 slug，`.cnb.yml` 用
+`${CNB_REPO_SLUG_LOWERCASE}/develop-env` 拼接）：
 
 | tag | 用途 | UID/GID |
 |---|---|---|
@@ -62,4 +63,6 @@ sh install.sh         # 安装常用开发工具
 - 只同步 `main`；tag 与其他分支不同步
 - **不要给插件设置 `force`**：`PLUGIN_FORCE` 非空即强推（`"false"` 也算）
 
-> ⚠️ 本仓库两边都应为 **private**（dotfiles 可能含个人环境信息）。
+> ⚠️ 本仓库两边均为 **public**（制品库公开 → 镜像可匿名 `docker pull`，NAS/新机器免登录）。
+> 纪律：**dotfiles 永远不放秘密**（token、密码、内网地址）——push 即发布，git 历史永久。
+> 秘密一律走 CNB 密钥仓库 `miojizzy/secrets` 或机器本地不入 git 的文件。
